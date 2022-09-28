@@ -43,7 +43,7 @@ logo <- image_read("https://www.turing.ac.uk/sites/default/files/styles/people/p
 logo
 ```
 
-## Contact {#contact}
+## Contact details {#contact}
 
 -   <i class="fa fa-envelope"></i> [arronslacey\@gmail.com](mailto:arronslacey@gmail.com){.email}
 -   <i class="fa fa-github"></i> [\@arronlacey](https://github.com/arronlacey)

@@ -1,0 +1,12 @@
+---
+title: "citations"
+author: "Arron Lacey"
+date: '2022-09-28'
+output: pdf_document
+bibliography: mypubs.bib
+---
+
+```{r bibs}
+# Just creating a bib file for the example
+knitr::write_bib("knitr", "mypubs.bib")
+```

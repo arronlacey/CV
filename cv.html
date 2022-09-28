@@ -1,0 +1,211 @@
+---
+title: "Arron Lacey"
+author: Arron Lacey
+date: "`r Sys.Date()`"
+bibliography: myrefs.bib
+output:
+  pagedown::html_resume:
+    css: ['css/styles.css', 'resume']
+    self_contained: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  results = "asis", 
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE
+)
+
+library(tidyverse)
+library(readxl)
+library(magick)
+library(glue)
+library(janitor)
+library(bib2df)
+
+source("parse-citations.R")
+```
+
+```{css, echo=FALSE}
+.pagedjs_page:not(:first-of-type) {
+  --sidebar-width: 0rem;
+  --sidebar-background-color: #ffffff;
+  --main-width: calc(var(--content-width) - var(--sidebar-width));
+  --decorator-horizontal-margin: 0.2in;
+}
+```
+
+# Aside
+
+```{r logo, warning = FALSE, message = FALSE, error = FALSE, fig.align = "center", out.width="50%"}
+logo <- image_read("https://www.turing.ac.uk/sites/default/files/styles/people/public/2022-04/profile_photo.jpg?itok=BzOTBaea")
+logo
+```
+
+## Contact {#contact}
+
+-   <i class="fa fa-envelope"></i> [arronslacey\@gmail.com](mailto:arronslacey@gmail.com){.email}
+-   <i class="fa fa-github"></i> [\@arronlacey](https://github.com/arronlacey)
+-   <i class="fa fa-twitter"></i> [\@arronlacey](https://twitter.com/arronlacey)
+
+## Skills {#skills}
+
+**Programming:**
+
+-   R
+-   SQL
+-   Python
+
+**Data Analysis:**
+
+-   Bayesian statistics
+-   Generalized linear models
+-   Natural Language Processing
+-   Machine Learning
+
+**Research Infrastructure**
+
+- Docker
+- GitHub/GitLab
+- CI/CD
+
+**Selected Presentations**
+
+- [Creating an effective learning experience (Quarto)](https://arronlacey.github.io/effective-learning-experience-talk/#/title-slide)
+- [Model Tracking and Deployment (Quarto)](https://edon-initiative.gitlab.io/mlops-presentation/#/title-slide)
+- [Lecture notebooks and videos](Kaggle Machine Learning MSc module code: https://www.kaggle.com/arronlacey/pm402-kaggle-resource)
+
+**Public profiles and Websites**
+
+  -   https://www.turing.ac.uk/people/arron-lacey
+  -   The Turing Way: https://the-turing-way.netlify.app/welcome
+  -   Public Github: https://github.com/arronlacey
+  -   Markup NLP Annotation website: https://www.getmarkup.com
+  -   ResearchGate: https://www.researchgate.net/profile/Arron-Lacey
+
+## Disclaimer {#disclaimer}
+
+Made with the R package [**pagedown**](https://github.com/rstudio/pagedown).
+
+Last updated on `r Sys.Date()`
+
+# Main
+
+## Arron Lacey, PhD {#title}
+
+### Senior Community Manager, The Alan Turing Insitute
+
+## Employment {data-icon="suitcase"}
+
+```{r print-emp}
+emp_data <- read_xlsx("cv-data.xlsx", sheet = "employment")
+
+emp_data %>%
+  replace_na(list(end = "present")) %>%
+  # mutate_at(vars(start, end), str_replace_all, pattern = "-[0-9]*$", "") %>%
+  nest(data = -c(org, institution, loc)) %>%
+  mutate(print_data = map(data, function(x) {
+    current <- filter(x, end == "present")
+    previous <- filter(x, end != "present")
+    
+    prev_positions <- x %>%
+      select(title:end) %>%
+      separate(start, c("start_year", "start_month"), "-", convert = TRUE) %>%
+      separate(end, c("end_year", "end_month"), "-", convert = TRUE,
+               fill = "right") %>%
+      mutate(start_month = month.name[start_month],
+             end_month = map_chr(end_month, function(x) {
+               if (is.na(x)) return(NA_character_)
+               month.name[x]
+             }),
+             label = glue("{title} ({start_month} {start_year}--{end_month} {end_year})")) %>%
+      pull(label) %>%
+      str_replace_all("NA ", "") %>%
+      as.character() %>%
+      list()
+    
+    current %>%
+      pivot_longer(contains("description"), names_to = "description_num",
+                   values_to = "description") %>%
+      filter(!is.na(description)) %>%
+      group_by(title) %>%
+      mutate(descriptions = list(description)) %>%
+      ungroup() %>%
+      filter(description_num == "description_1") %>%
+      mutate(full_start = min(x$start)) %>%
+      separate(full_start, c("start_year", "start_month"), convert = TRUE) %>%
+      mutate(timeline = glue("{end} - {month.name[start_month]} {start_year}"),
+             timeline = as.character(timeline),
+             description_bullets = map_chr(descriptions, ~paste("-", .x, collapse = "\n")),
+             prev_pos = ifelse(nrow(previous) == 0, NA_character_,
+                               paste("**Position History**\n\n",
+                                     map_chr(prev_positions, ~paste("-", .x, collapse = "\n"))))) %>%
+      select(title, timeline, description_bullets, prev_pos)
+  })) %>%
+  select(-data) %>%
+  unnest(cols = c(print_data)) %>%
+  glue_data(
+    "### {org}{ifelse(is.na(institution), '', paste(',', institution))}",
+    "\n\n",
+    "{title}",
+    "\n\n",
+    "{loc}",
+    "\n\n",
+    "{timeline}",
+    "\n\n",
+    "{description_bullets}",
+    "\n\n",
+    "{ifelse(is.na(prev_pos), '', prev_pos)}",
+    "\n\n\n"
+  )
+```
+
+## Education {data-icon="graduation-cap" data-concise="true"}
+
+```{r print-edu}
+edu_data <- read_xlsx("cv-data.xlsx", sheet = "education")
+
+edu_data %>% 
+    arrange(desc(end)) %>% 
+    mutate(id = 1:n()) %>% 
+    pivot_longer(
+      starts_with('description'),
+      names_to = 'description_num',
+      values_to = 'description',
+      values_drop_na = TRUE
+    ) %>% 
+    group_by(id) %>% 
+    mutate(
+      descriptions = list(description)
+    ) %>% 
+    ungroup() %>% 
+    filter(description_num == 'description_1') %>% 
+    mutate(
+      timeline = ifelse(
+        is.na(start) | start == end,
+        end,
+        glue('{end} - {start}')
+      ),
+      description_bullets = map_chr(descriptions, ~paste('-', ., collapse = '\n')),
+    ) %>% 
+    mutate_all(~ifelse(is.na(.), 'N/A', .)) %>% 
+    glue_data(
+      "### {title}",
+      "\n\n",
+      "{institution}",
+      "\n\n",
+      "{loc}",
+      "\n\n",
+      "{timeline}", 
+      "\n\n",
+      "{description_bullets}",
+      "\n\n\n",
+    )
+```
+
+### Selected Publications {data-icon="award" data-concise="true"}
+
+---
+nocite: '@*'
+...

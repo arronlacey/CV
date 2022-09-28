@@ -57,18 +57,15 @@ logo
 -   SQL
 -   Python
 
-**Data Analysis:**
-
--   Bayesian statistics
--   Generalized linear models
--   Natural Language Processing
--   Machine Learning
-
 **Research Infrastructure**
 
 - Docker
 - GitHub/GitLab
 - CI/CD
+
+**R packages**
+
+- wandbR Weights and Biases R API - https://github.com/arronlacey/wandbR
 
 **Selected Presentations**
 
@@ -78,9 +75,9 @@ logo
 
 **Public profiles and Websites**
 
-  -   https://www.turing.ac.uk/people/arron-lacey
+  -   Turing Profile https://www.turing.ac.uk/people/arron-lacey
   -   The Turing Way: https://the-turing-way.netlify.app/welcome
-  -   Public Github: https://github.com/arronlacey
+  -   Carpentries AI Educators Course https://carpentries-incubator.github.io/data-science-ai-senior-researchers/
   -   Markup NLP Annotation website: https://www.getmarkup.com
   -   ResearchGate: https://www.researchgate.net/profile/Arron-Lacey
 
